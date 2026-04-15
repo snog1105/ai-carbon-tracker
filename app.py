@@ -11,7 +11,7 @@ st.set_page_config(
 
 # -----------------------------------
 # Placeholder Research Values
-# Replace these later with real data
+# Replace later with research-backed values
 # -----------------------------------
 ENERGY_RATES = {
     "Small": {
@@ -46,7 +46,6 @@ PHONE_CHARGE_KWH = 0.012
 LAPTOP_HOUR_KWH = 0.05
 MILES_PER_KG_CO2 = 2.5
 
-
 # -----------------------------------
 # Helper Functions
 # -----------------------------------
@@ -61,13 +60,12 @@ def get_impact_level(carbon_emissions: float) -> str:
 
 
 def get_impact_color(level: str) -> str:
-    colors = {
+    return {
         "No Impact": "#2E8B57",
-        "Low Impact": "#9ACD32",
-        "Moderate Impact": "#DAA520",
-        "High Impact": "#DC143C"
-    }
-    return colors[level]
+        "Low Impact": "#84C57C",
+        "Moderate Impact": "#D9A441",
+        "High Impact": "#C94C4C"
+    }[level]
 
 
 def get_tip(level: str) -> str:
@@ -89,41 +87,112 @@ def calculate_results(num_prompts: int, model_size: str, task_type: str, energy_
 
 
 # -----------------------------------
-# Custom Styling
+# Styling
 # -----------------------------------
 st.markdown(
     """
     <style>
-    .main-title {
-        font-size: 2.3rem;
-        font-weight: 700;
-        margin-bottom: 0.2rem;
+    /* App background */
+    .stApp {
+        background: linear-gradient(180deg, #edf7f0 0%, #f8fcf9 100%);
     }
-    .subtitle {
-        font-size: 1.1rem;
-        color: #555;
-        margin-bottom: 1.5rem;
+
+    /* Main content width and padding */
+    .block-container {
+        max-width: 1150px;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
     }
-    .section-header {
-        font-size: 1.4rem;
-        font-weight: 600;
-        margin-top: 1rem;
-        margin-bottom: 0.5rem;
-    }
-    .impact-box {
-        padding: 1rem;
-        border-radius: 14px;
-        color: white;
-        font-weight: 600;
+
+    /* Typography */
+    .hero-title {
         text-align: center;
-        margin-top: 0.5rem;
+        font-size: 3rem;
+        font-weight: 800;
+        color: #173A2D;
+        margin-bottom: 0.15rem;
+    }
+
+    .hero-subtitle {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #4E7564;
+        margin-bottom: 1.6rem;
+    }
+
+    .section-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #173A2D;
+        margin-top: 0.2rem;
+        margin-bottom: 0.8rem;
+    }
+
+    /* Card style */
+    .custom-card {
+        background: #ffffff;
+        border: 1px solid #e3efe6;
+        border-radius: 18px;
+        padding: 1.2rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
         margin-bottom: 1rem;
     }
-    .info-box {
-        background-color: #f5f7fa;
+
+    /* Soft info box */
+    .soft-box {
+        background: #f3fbf5;
+        border: 1px solid #d9eadf;
+        border-radius: 14px;
         padding: 1rem;
-        border-radius: 12px;
-        border: 1px solid #e6e9ef;
+        color: #254737;
+        margin-top: 0.8rem;
+    }
+
+    /* Impact badge */
+    .impact-box {
+        padding: 0.9rem;
+        border-radius: 14px;
+        color: white;
+        font-weight: 700;
+        text-align: center;
+        font-size: 1.05rem;
+        margin-top: 0.9rem;
+        margin-bottom: 0.2rem;
+    }
+
+    /* Footer */
+    .footer-note {
+        text-align: center;
+        color: #5B7769;
+        font-size: 0.95rem;
+        margin-top: 0.8rem;
+        margin-bottom: 0.4rem;
+    }
+
+    /* Streamlit metric cards */
+    div[data-testid="stMetric"] {
+        background-color: #ffffff;
+        border: 1px solid #e3efe6;
+        padding: 0.85rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Rounded inputs */
+    div[data-baseweb="select"] > div,
+    div[data-baseweb="input"] > div {
+        border-radius: 12px !important;
+    }
+
+    /* Make expander cleaner */
+    .streamlit-expanderHeader {
+        font-weight: 600;
+        color: #173A2D;
+    }
+
+    /* Hide default top padding around title anchors */
+    h1, h2, h3 {
+        padding-top: 0 !important;
     }
     </style>
     """,
@@ -133,25 +202,32 @@ st.markdown(
 # -----------------------------------
 # Header
 # -----------------------------------
-st.markdown('<div class="main-title">Making the Invisible Visible</div>', unsafe_allow_html=True)
+st.markdown('<div class="hero-title">Making the Invisible Visible</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle">A Human-Centered AI Carbon Footprint Tracker</div>',
+    '<div class="hero-subtitle">A Human-Centered AI Carbon Footprint Tracker</div>',
     unsafe_allow_html=True
 )
-st.write("Estimate the environmental impact of AI usage and explore more sustainable choices.")
 
-st.divider()
+st.markdown(
+    """
+    <div class="custom-card">
+        This tool estimates the environmental impact of AI use and helps users explore more sustainable choices through clear, real-time feedback.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # -----------------------------------
-# Layout
+# Main Layout
 # -----------------------------------
-left_col, right_col = st.columns([1, 1.2])
+left_col, right_col = st.columns([1, 1.15], gap="large")
 
 # -----------------------------------
-# Left Column: Inputs
+# Inputs Section
 # -----------------------------------
 with left_col:
-    st.markdown('<div class="section-header">Enter AI Usage Details</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">🌱 Enter AI Usage Details</div>', unsafe_allow_html=True)
+    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
 
     num_prompts = st.slider(
         "Number of AI prompts",
@@ -183,7 +259,7 @@ with left_col:
 
     st.markdown(
         """
-        <div class="info-box">
+        <div class="soft-box">
         <b>Project Goal:</b><br>
         Help users understand the hidden environmental footprint of AI and encourage more sustainable digital habits.
         </div>
@@ -191,8 +267,10 @@ with left_col:
         unsafe_allow_html=True
     )
 
+    st.markdown('</div>', unsafe_allow_html=True)
+
 # -----------------------------------
-# Calculate Results
+# Calculations
 # -----------------------------------
 total_energy, carbon_emissions, water_used = calculate_results(
     num_prompts, model_size, task_type, energy_source
@@ -202,11 +280,16 @@ impact_level = get_impact_level(carbon_emissions)
 impact_color = get_impact_color(impact_level)
 tip = get_tip(impact_level)
 
+phone_charges = total_energy / PHONE_CHARGE_KWH
+laptop_hours = total_energy / LAPTOP_HOUR_KWH
+miles_driven = carbon_emissions * MILES_PER_KG_CO2
+
 # -----------------------------------
-# Right Column: Results
+# Results Section
 # -----------------------------------
 with right_col:
-    st.markdown('<div class="section-header">Estimated Impact</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">🌍 Estimated Impact</div>', unsafe_allow_html=True)
+    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
 
     r1, r2 = st.columns(2)
     with r1:
@@ -225,30 +308,33 @@ with right_col:
         unsafe_allow_html=True
     )
 
+    st.markdown('</div>', unsafe_allow_html=True)
+
 # -----------------------------------
 # Impact Scale
 # -----------------------------------
-st.divider()
-st.markdown('<div class="section-header">Impact Scale</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">📊 Impact Scale</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-card">', unsafe_allow_html=True)
 
 impact_score = min(carbon_emissions / 0.60, 1.0)
 st.progress(impact_score)
 
 scale_cols = st.columns(4)
-scale_cols[0].markdown("**No Impact**")
-scale_cols[1].markdown("**Low Impact**")
-scale_cols[2].markdown("**Moderate Impact**")
-scale_cols[3].markdown("**High Impact**")
+with scale_cols[0]:
+    st.markdown("**No Impact**")
+with scale_cols[1]:
+    st.markdown("**Low Impact**")
+with scale_cols[2]:
+    st.markdown("**Moderate Impact**")
+with scale_cols[3]:
+    st.markdown("**High Impact**")
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------
-# Real-World Comparisons
+# Real-world Comparisons
 # -----------------------------------
-st.divider()
-st.markdown('<div class="section-header">What Does This Mean?</div>', unsafe_allow_html=True)
-
-phone_charges = total_energy / PHONE_CHARGE_KWH
-laptop_hours = total_energy / LAPTOP_HOUR_KWH
-miles_driven = carbon_emissions * MILES_PER_KG_CO2
+st.markdown('<div class="section-title">🔍 What Does This Mean?</div>', unsafe_allow_html=True)
 
 c1, c2, c3 = st.columns(3)
 with c1:
@@ -261,12 +347,11 @@ with c3:
 # -----------------------------------
 # Sustainability Tip
 # -----------------------------------
-st.divider()
-st.markdown('<div class="section-header">Sustainability Tip</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">💡 Sustainability Tip</div>', unsafe_allow_html=True)
 st.info(tip)
 
 # -----------------------------------
-# How It Works
+# Transparency / Method
 # -----------------------------------
 with st.expander("How this estimate works"):
     st.write(
@@ -285,11 +370,18 @@ with st.expander("How this estimate works"):
 # -----------------------------------
 # Why This Matters
 # -----------------------------------
-st.divider()
-st.markdown('<div class="section-header">Why This Matters</div>', unsafe_allow_html=True)
-st.write(
+st.markdown('<div class="section-title">🌎 Why This Matters</div>', unsafe_allow_html=True)
+st.markdown(
     """
-    AI is becoming part of everyday life, but its environmental footprint often stays hidden.
-    This tool helps make that impact visible so people can use AI more thoughtfully and sustainably.
-    """
+    <div class="custom-card">
+        AI is becoming part of everyday life, but its environmental footprint often stays hidden.
+        This tool helps make that impact visible so people can use AI more thoughtfully and sustainably.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    '<div class="footer-note">Designed to make the hidden environmental cost of AI easier to understand.</div>',
+    unsafe_allow_html=True
 )
