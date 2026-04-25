@@ -365,6 +365,44 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+st.markdown("""
+<style>
+@media screen and (max-width: 768px) {
+
+    /* Fix faded mobile text without redesigning the app */
+    p, span, div, label, small,
+    [data-testid="stMarkdownContainer"],
+    [data-testid="stWidgetLabel"],
+    [data-testid="stCaptionContainer"] {
+        color: #18382F !important;
+        opacity: 1 !important;
+    }
+
+    /* Make metric/card text readable on phones */
+    [data-testid="stMetric"] *,
+    .custom-card *,
+    .mini-card *,
+    .soft-box *,
+    .compare-box * {
+        color: #18382F !important;
+        opacity: 1 !important;
+    }
+
+    /* Keep dropdown text readable without changing the dropdown design */
+    div[data-baseweb="select"] *,
+    div[data-baseweb="popover"] * {
+        opacity: 1 !important;
+    }
+
+    /* Tabs */
+    button[data-baseweb="tab"] *,
+    button[data-baseweb="tab"] {
+        opacity: 1 !important;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
+
 # -----------------------------------
 # Hero Section
 # -----------------------------------
