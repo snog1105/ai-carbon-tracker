@@ -403,6 +403,31 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+@media screen and (max-width: 768px) {
+
+    /* Fix dropdown (black bar) selected text */
+    div[data-baseweb="select"] > div {
+        color: #FFFFFF !important;   /* bright white text */
+        opacity: 1 !important;
+    }
+
+    /* Fix text inside dropdown menu items */
+    div[data-baseweb="menu"] * {
+        color: #FFFFFF !important;
+        opacity: 1 !important;
+    }
+
+    /* Fix the little selected value label specifically */
+    div[data-baseweb="select"] span {
+        color: #FFFFFF !important;
+        opacity: 1 !important;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
+
 # -----------------------------------
 # Hero Section
 # -----------------------------------
