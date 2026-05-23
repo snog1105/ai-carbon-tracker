@@ -1,19 +1,12 @@
 import streamlit as st
 import pandas as pd
 
-# -----------------------------------
-# Page Configuration
-# -----------------------------------
 st.set_page_config(
     page_title="AI Carbon Footprint Tracker",
     page_icon="🌍",
     layout="wide"
 )
 
-# -----------------------------------
-# Default Model Profiles
-# Prototype assumptions for testing
-# -----------------------------------
 MODEL_PROFILES = {
     "Lightweight Text Model": {
         "description": "Best for short, simple text tasks with lower environmental impact.",
@@ -53,29 +46,29 @@ MODEL_PROFILES = {
     }
 }
 
-DEFAULT_CARBON_FACTORS = {
-    "Low-carbon grid": 0.15,
-    "Average grid": 0.40,
-    "High-carbon grid": 0.70
+GRID_REGIONS = {
+    "US Average": {"carbon_factor": 0.40, "description": "Average electricity grid estimate."},
+    "California": {"carbon_factor": 0.20, "description": "Lower-carbon grid with more renewable energy."},
+    "Texas": {"carbon_factor": 0.45, "description": "Mixed grid with significant fossil fuel use."},
+    "Quebec": {"carbon_factor": 0.03, "description": "Very low-carbon grid because of hydroelectric power."},
+    "India": {"carbon_factor": 0.70, "description": "Higher-carbon grid due to heavier fossil fuel use."}
 }
 
-DEFAULT_WATER_FACTOR = 2.0  # liters per kWh
+DEFAULT_WATER_FACTOR = 2.0
 PHONE_CHARGE_KWH = 0.012
 LAPTOP_HOUR_KWH = 0.05
 MILES_PER_KG_CO2 = 2.5
+LED_BULB_KWH_PER_HOUR = 0.010
+MICROWAVE_KWH_PER_MIN = 0.020
+TV_KWH_PER_HOUR = 0.100
 
-# -----------------------------------
-# Session State
-# -----------------------------------
 if "history" not in st.session_state:
     st.session_state.history = []
 
 if "last_result" not in st.session_state:
     st.session_state.last_result = None
 
-# -----------------------------------
-# Helper Functions
-# -----------------------------------
+
 def get_impact_level(carbon_emissions: float) -> str:
     if carbon_emissions < 0.05:
         return "No Impact"
@@ -121,13 +114,7 @@ def get_tip_options(level: str):
     ]
 
 
-def calculate_results(
-    num_prompts: int,
-    model_profile: str,
-    task_type: str,
-    carbon_factor: float,
-    water_factor: float
-):
+def calculate_results(num_prompts, model_profile, task_type, carbon_factor, water_factor):
     energy_per_prompt = MODEL_PROFILES[model_profile]["rates"][task_type]
     total_energy = energy_per_prompt * num_prompts
     carbon_emissions = total_energy * carbon_factor
@@ -158,13 +145,9 @@ def build_comparison_text(current, previous):
             f"**{abs(carbon_diff):.3f} more kg CO₂e** "
             f"(about **{extra_phone:.1f} additional phone charges worth of energy**)."
         )
-    else:
-        return "This estimate is essentially the same as your previous one."
+    return "This estimate is essentially the same as your previous one."
 
 
-# -----------------------------------
-# Styling
-# -----------------------------------
 st.markdown(
     """
     <style>
@@ -195,6 +178,7 @@ st.markdown(
         font-size: 0.8rem;
         opacity: 0.85;
         margin-bottom: 0.8rem;
+        color: #f4fff7;
     }
 
     .hero-title {
@@ -202,6 +186,7 @@ st.markdown(
         font-weight: 800;
         line-height: 1.05;
         margin-bottom: 0.5rem;
+        color: #ffffff;
     }
 
     .hero-subtitle {
@@ -267,7 +252,7 @@ st.markdown(
     .impact-box {
         padding: 0.9rem;
         border-radius: 14px;
-        color: white;
+        color: white !important;
         font-weight: 700;
         text-align: center;
         font-size: 1.05rem;
@@ -360,77 +345,64 @@ st.markdown(
         font-weight: 600;
         color: #173A2D;
     }
+
+    @media screen and (max-width: 768px) {
+        p, span, div, label, small,
+        [data-testid="stMarkdownContainer"],
+        [data-testid="stWidgetLabel"],
+        [data-testid="stCaptionContainer"] {
+            color: #18382F !important;
+            opacity: 1 !important;
+        }
+
+        [data-testid="stMetric"] *,
+        .custom-card *,
+        .mini-card *,
+        .soft-box *,
+        .compare-box * {
+            color: #18382F !important;
+            opacity: 1 !important;
+        }
+
+        .hero-wrap *,
+        .hero-title,
+        .hero-subtitle,
+        .hero-kicker,
+        .hero-badge {
+            color: #ffffff !important;
+            opacity: 1 !important;
+        }
+
+        div[data-baseweb="select"] > div {
+            color: #FFFFFF !important;
+            opacity: 1 !important;
+        }
+
+        div[data-baseweb="select"] span {
+            color: #FFFFFF !important;
+            opacity: 1 !important;
+        }
+
+        div[data-baseweb="menu"] * {
+            color: #FFFFFF !important;
+            opacity: 1 !important;
+        }
+
+        button[data-baseweb="tab"] *,
+        button[data-baseweb="tab"] {
+            opacity: 1 !important;
+        }
+
+        .impact-box,
+        .impact-box * {
+            color: #ffffff !important;
+        }
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-st.markdown("""
-<style>
-@media screen and (max-width: 768px) {
-
-    /* Fix faded mobile text without redesigning the app */
-    p, span, div, label, small,
-    [data-testid="stMarkdownContainer"],
-    [data-testid="stWidgetLabel"],
-    [data-testid="stCaptionContainer"] {
-        color: #18382F !important;
-        opacity: 1 !important;
-    }
-
-    /* Make metric/card text readable on phones */
-    [data-testid="stMetric"] *,
-    .custom-card *,
-    .mini-card *,
-    .soft-box *,
-    .compare-box * {
-        color: #18382F !important;
-        opacity: 1 !important;
-    }
-
-    /* Keep dropdown text readable without changing the dropdown design */
-    div[data-baseweb="select"] *,
-    div[data-baseweb="popover"] * {
-        opacity: 1 !important;
-    }
-
-    /* Tabs */
-    button[data-baseweb="tab"] *,
-    button[data-baseweb="tab"] {
-        opacity: 1 !important;
-    }
-}
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<style>
-@media screen and (max-width: 768px) {
-
-    /* Fix dropdown (black bar) selected text */
-    div[data-baseweb="select"] > div {
-        color: #FFFFFF !important;   /* bright white text */
-        opacity: 1 !important;
-    }
-
-    /* Fix text inside dropdown menu items */
-    div[data-baseweb="menu"] * {
-        color: #FFFFFF !important;
-        opacity: 1 !important;
-    }
-
-    /* Fix the little selected value label specifically */
-    div[data-baseweb="select"] span {
-        color: #FFFFFF !important;
-        opacity: 1 !important;
-    }
-}
-</style>
-""", unsafe_allow_html=True)
-
-# -----------------------------------
-# Hero Section
-# -----------------------------------
 st.markdown(
     """
     <div class="hero-wrap">
@@ -443,17 +415,15 @@ st.markdown(
             <div class="hero-badge">Energy Use</div>
             <div class="hero-badge">Carbon Emissions</div>
             <div class="hero-badge">Water Consumption</div>
-            <div class="hero-badge">Behavior-Awareness Testing</div>
+            <div class="hero-badge">Regional Grid Impact</div>
         </div>
     </div>
     """,
     unsafe_allow_html=True
 )
 
-# -----------------------------------
-# Top explainer row
-# -----------------------------------
-c1, c2, c3 = st.columns(3)
+c1, c2 = st.columns(2)
+
 with c1:
     st.markdown(
         """
@@ -466,6 +436,7 @@ with c1:
         """,
         unsafe_allow_html=True
     )
+
 with c2:
     st.markdown(
         """
@@ -478,24 +449,9 @@ with c2:
         """,
         unsafe_allow_html=True
     )
-with c3:
-    st.markdown(
-        """
-        <div class="mini-card">
-            <div class="info-grid-title">What it tests</div>
-            <div class="info-grid-text">
-                The project explores whether real-time environmental feedback can influence awareness and behavior.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# -----------------------------------
-# Tabs
-# -----------------------------------
 tracker_tab, insights_tab, why_tab = st.tabs(["Tracker", "Insights", "Why This Matters"])
 
 with tracker_tab:
@@ -534,22 +490,24 @@ with tracker_tab:
         )
         st.caption("Image generation and repeated regenerations are usually more resource-intensive.")
 
-        energy_source = st.selectbox(
-            "Grid carbon level",
-            ["Low-carbon grid", "Average grid", "High-carbon grid"],
-            help="This estimates how carbon-intensive the electricity source is."
+        grid_region = st.selectbox(
+            "Electricity grid region",
+            list(GRID_REGIONS.keys()),
+            help="Different regions use different energy sources, so the same AI task can create different emissions depending on where the electricity comes from."
         )
-        st.caption("Cleaner grids rely more on low-carbon energy sources. Higher-carbon grids rely more on fossil fuels.")
+        st.caption(GRID_REGIONS[grid_region]["description"])
+        st.caption("This shows why where AI runs can affect its environmental impact.")
 
         with st.expander("Advanced Assumptions"):
             st.write("Use these controls to test how changing assumptions affects the output.")
 
             carbon_factor = st.slider(
                 "Carbon factor (kg CO₂e per kWh)",
-                min_value=0.05,
+                min_value=0.01,
                 max_value=1.00,
-                value=float(DEFAULT_CARBON_FACTORS[energy_source]),
-                step=0.01
+                value=float(GRID_REGIONS[grid_region]["carbon_factor"]),
+                step=0.01,
+                help="This estimates how much carbon is produced per unit of electricity used."
             )
 
             water_factor = st.slider(
@@ -572,7 +530,6 @@ with tracker_tab:
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Calculations
     energy_per_prompt, total_energy, carbon_emissions, water_used = calculate_results(
         num_prompts=num_prompts,
         model_profile=model_profile,
@@ -587,11 +544,15 @@ with tracker_tab:
     phone_charges = total_energy / PHONE_CHARGE_KWH
     laptop_hours = total_energy / LAPTOP_HOUR_KWH
     miles_driven = carbon_emissions * MILES_PER_KG_CO2
+    led_bulb_hours = total_energy / LED_BULB_KWH_PER_HOUR
+    microwave_minutes = total_energy / MICROWAVE_KWH_PER_MIN
+    tv_hours = total_energy / TV_KWH_PER_HOUR
 
     current_result = {
         "num_prompts": num_prompts,
         "model_profile": model_profile,
         "task_type": task_type,
+        "grid_region": grid_region,
         "carbon_factor": carbon_factor,
         "water_factor": water_factor,
         "energy_per_prompt": energy_per_prompt,
@@ -609,6 +570,7 @@ with tracker_tab:
         or previous_result["num_prompts"] != current_result["num_prompts"]
         or previous_result["model_profile"] != current_result["model_profile"]
         or previous_result["task_type"] != current_result["task_type"]
+        or previous_result["grid_region"] != current_result["grid_region"]
         or previous_result["carbon_factor"] != current_result["carbon_factor"]
         or previous_result["water_factor"] != current_result["water_factor"]
     ):
@@ -626,6 +588,17 @@ with tracker_tab:
         with r2:
             st.metric("Carbon Emissions", f"{carbon_emissions:.3f} kg CO₂e")
             st.metric("Impact Level", impact_level)
+
+        st.markdown(
+            f"""
+            <div class="soft-box">
+                <b>Selected Grid Region:</b> {grid_region}<br>
+                <b>Carbon Factor:</b> {carbon_factor:.2f} kg CO₂e per kWh<br>
+                The same AI usage can create different emissions depending on the electricity grid.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         st.markdown(
             f"""
@@ -655,6 +628,7 @@ with tracker_tab:
         )
 
         st.markdown("### What Does This Mean?")
+
         c1, c2, c3 = st.columns(3)
         with c1:
             st.metric("Phone Charges", f"{phone_charges:.1f}")
@@ -662,6 +636,18 @@ with tracker_tab:
             st.metric("Laptop Hours", f"{laptop_hours:.1f}")
         with c3:
             st.metric("Miles Driven", f"{miles_driven:.2f}")
+
+        c4, c5, c6 = st.columns(3)
+        with c4:
+            st.metric("LED Bulb Hours", f"{led_bulb_hours:.1f}")
+        with c5:
+            st.metric("Microwave Minutes", f"{microwave_minutes:.1f}")
+        with c6:
+            st.metric("TV Hours", f"{tv_hours:.1f}")
+
+        st.caption(
+            "These comparisons are approximate and are designed to make the environmental impact easier to understand."
+        )
 
         if comparison_text:
             st.markdown(
@@ -695,7 +681,7 @@ with tracker_tab:
 
             **Calculation logic**
             - Energy per prompt × number of prompts = total energy used
-            - Total energy × carbon factor = estimated CO₂ emissions
+            - Total energy × regional carbon factor = estimated CO₂ emissions
             - Total energy × water factor = estimated water usage
 
             These values are estimates designed to improve awareness and support testing.
@@ -718,7 +704,7 @@ with insights_tab:
         st.write("Recent estimate history:")
         st.dataframe(
             history_df[[
-                "Run", "model_profile", "task_type",
+                "Run", "model_profile", "task_type", "grid_region",
                 "num_prompts", "carbon_emissions",
                 "total_energy", "water_used", "impact_level"
             ]],
@@ -739,8 +725,8 @@ with why_tab:
             Behind every AI interaction is infrastructure that uses electricity, water, and computational power.
             When people cannot see that cost, it becomes difficult to make informed and sustainable choices.
             <br><br>
-            This tracker was designed to translate abstract environmental data into something more understandable,
-            more visible, and more actionable for users.
+            This upgraded tracker also shows that the environmental impact of AI can change depending on the electricity grid region.
+            A task powered by a lower-carbon grid can have a very different carbon footprint than the same task powered by a higher-carbon grid.
         </div>
         """,
         unsafe_allow_html=True
