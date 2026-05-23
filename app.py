@@ -724,9 +724,6 @@ with why_tab:
             <br><br>
             Behind every AI interaction is infrastructure that uses electricity, water, and computational power.
             When people cannot see that cost, it becomes difficult to make informed and sustainable choices.
-            <br><br>
-            This upgraded tracker also shows that the environmental impact of AI can change depending on the electricity grid region.
-            A task powered by a lower-carbon grid can have a very different carbon footprint than the same task powered by a higher-carbon grid.
         </div>
         """,
         unsafe_allow_html=True
