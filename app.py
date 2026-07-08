@@ -407,10 +407,10 @@ st.markdown(
     """
     <div class="hero-wrap">
         <div class="hero-kicker">Human-Centered AI • Sustainability • Behavior Change</div>
-        <div class="hero-title">Making the Invisible Visible</div>
-        <div class="hero-subtitle">
-            Estimate the environmental impact of AI use in real time and explore how clearer feedback can encourage more thoughtful, sustainable digital habits.
-        </div>
+        <h1 class="hero-title">AI Carbon Footprint Tracker: Making the Invisible Visible</h1>
+        <p class="hero-subtitle">
+            Estimate the carbon emissions, energy use, and water footprint of AI prompts in real time, and explore how clearer feedback can encourage more thoughtful, sustainable digital habits.
+        </p>
         <div class="hero-badge-row">
             <div class="hero-badge">Energy Use</div>
             <div class="hero-badge">Carbon Emissions</div>
@@ -428,7 +428,7 @@ with c1:
     st.markdown(
         """
         <div class="mini-card">
-            <div class="info-grid-title">What this tool does</div>
+            <h3 class="info-grid-title">What this tool does</h3>
             <div class="info-grid-text">
                 It estimates the environmental footprint of AI use and turns abstract technical data into understandable, user-facing feedback.
             </div>
@@ -441,7 +441,7 @@ with c2:
     st.markdown(
         """
         <div class="mini-card">
-            <div class="info-grid-title">Why it matters</div>
+            <h3 class="info-grid-title">Why it matters</h3>
             <div class="info-grid-text">
                 Most users never see the hidden energy, water, or carbon cost behind everyday AI interactions.
             </div>
@@ -458,7 +458,7 @@ with tracker_tab:
     left_col, right_col = st.columns([1, 1.2], gap="large")
 
     with left_col:
-        st.markdown('<div class="section-title">🌱 AI Usage Details</div>', unsafe_allow_html=True)
+        st.markdown('<h2 class="section-title">🌱 AI Usage Details</h2>', unsafe_allow_html=True)
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
 
         num_prompts = st.slider(
@@ -578,7 +578,7 @@ with tracker_tab:
         st.session_state.last_result = current_result.copy()
 
     with right_col:
-        st.markdown('<div class="section-title">🌍 Estimated Impact</div>', unsafe_allow_html=True)
+        st.markdown('<h2 class="section-title">🌍 Estimated Impact</h2>', unsafe_allow_html=True)
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
 
         r1, r2 = st.columns(2)
@@ -661,7 +661,7 @@ with tracker_tab:
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">💡 Sustainability Tips</div>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">💡 Sustainability Tips</h2>', unsafe_allow_html=True)
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
 
     tip_options = get_tip_options(impact_level)
@@ -689,7 +689,7 @@ with tracker_tab:
         )
 
 with insights_tab:
-    st.markdown('<div class="section-title">📈 Estimate History and Trends</div>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">📈 Estimate History and Trends</h2>', unsafe_allow_html=True)
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
 
     history_df = pd.DataFrame(st.session_state.history)
@@ -716,7 +716,7 @@ with insights_tab:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with why_tab:
-    st.markdown('<div class="section-title">🌎 Why This Matters</div>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">🌎 Why This Matters</h2>', unsafe_allow_html=True)
     st.markdown(
         """
         <div class="custom-card">
@@ -729,7 +729,7 @@ with why_tab:
         unsafe_allow_html=True
     )
 
-    st.markdown('<div class="section-title">Key Takeaway</div>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">Key Takeaway</h2>', unsafe_allow_html=True)
     st.markdown(
         """
         <div class="soft-box">
