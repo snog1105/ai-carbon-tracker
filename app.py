@@ -58,9 +58,10 @@ DEFAULT_WATER_FACTOR = 2.0
 PHONE_CHARGE_KWH = 0.012
 LAPTOP_HOUR_KWH = 0.05
 MILES_PER_KG_CO2 = 2.5
-LED_BULB_KWH_PER_HOUR = 0.010
-MICROWAVE_KWH_PER_MIN = 0.020
-TV_KWH_PER_HOUR = 0.100
+LED_BULB_KWH_PER_MIN = 0.010 / 60
+LAPTOP_KWH_PER_MIN = 0.05 / 60
+SHOWER_LITERS_PER_MIN = 9
+TREE_CO2_PER_YEAR = 22
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -542,11 +543,11 @@ with tracker_tab:
     impact_color = get_impact_color(impact_level)
 
     phone_charges = total_energy / PHONE_CHARGE_KWH
-    laptop_hours = total_energy / LAPTOP_HOUR_KWH
+    laptop_minutes = total_energy / LAPTOP_KWH_PER_MIN
     miles_driven = carbon_emissions * MILES_PER_KG_CO2
-    led_bulb_hours = total_energy / LED_BULB_KWH_PER_HOUR
-    microwave_minutes = total_energy / MICROWAVE_KWH_PER_MIN
-    tv_hours = total_energy / TV_KWH_PER_HOUR
+    led_bulb_minutes = total_energy / LED_BULB_KWH_PER_MIN
+    shower_minutes = water_used / SHOWER_LITERS_PER_MIN
+    trees_needed = carbon_emissions / TREE_CO2_PER_YEAR
 
     current_result = {
         "num_prompts": num_prompts,
@@ -633,17 +634,17 @@ with tracker_tab:
         with c1:
             st.metric("Phone Charges", f"{phone_charges:.1f}")
         with c2:
-            st.metric("Laptop Hours", f"{laptop_hours:.1f}")
+            st.metric("Laptop Minutes", f"{laptop_minutes:.1f}")
         with c3:
             st.metric("Miles Driven", f"{miles_driven:.2f}")
 
         c4, c5, c6 = st.columns(3)
         with c4:
-            st.metric("LED Bulb Hours", f"{led_bulb_hours:.1f}")
+            st.metric("LED Bulb Minutes", f"{led_bulb_minutes:.1f}")
         with c5:
-            st.metric("Microwave Minutes", f"{microwave_minutes:.1f}")
+            st.metric("Minutes in the Shower", f"{shower_minutes:.1f}")
         with c6:
-            st.metric("TV Hours", f"{tv_hours:.1f}")
+            st.metric("Trees Needed (1 Year)", f"{trees_needed:.2f}")
 
         st.caption(
             "These comparisons are approximate and are designed to make the environmental impact easier to understand."
