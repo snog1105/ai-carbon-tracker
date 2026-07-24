@@ -54,43 +54,33 @@ GRID_REGIONS = {
     "India": {"carbon_factor": 0.70, "description": "Higher-carbon grid due to heavier fossil fuel use."}
 }
 
-DEFAULT_WATER_FACTOR = 2.0
+DEFAULT_WATER_FACTOR = 0.36
 PHONE_CHARGE_KWH = 0.012
 LAPTOP_HOUR_KWH = 0.05
-MILES_PER_KG_CO2 = 2.5
+
+# EPA equivalency: 0.391 kg CO2e per mile for an average gasoline vehicle.
+MILES_PER_KG_CO2 = 1 / 0.391
+
 LED_BULB_KWH_PER_MIN = 0.010 / 60
 LAPTOP_KWH_PER_MIN = 0.05 / 60
-SHOWER_LITERS_PER_MIN = 9
-TREE_CO2_PER_YEAR = 22
 
-# Water-estimation assumptions
-# The 0.025-liter baseline represents 25 mL for a standard short text prompt.
-BASE_WATER_PER_PROMPT_L = 0.025
+# EPA WaterSense maximum flow rate: 7.6 liters per minute.
+SHOWER_LITERS_PER_MIN = 7.6
 
-MODEL_WATER_MULTIPLIERS = {
-    "Lightweight Text Model": 0.60,
-    "Standard Chat Model": 1.00,
-    "Advanced Reasoning Model": 1.80,
-    "Large Multimodal Model": 2.50
-}
+# EPA equivalency: an urban tree planted and grown for 10 years
+# sequesters an annual average of 0.060 metric tons (60 kg) of CO2.
+TREE_CO2_PER_YEAR = 60.0
 
-TASK_WATER_MULTIPLIERS = {
-    "Short text response": 1.00,
-    "Long text generation": 2.00,
-    "Multiple regenerations": 3.00,
-    "Image generation": 10.00
-}
+# Research-backed operational water factors.
+# Lawrence Berkeley National Laboratory reports:
+# - Average U.S. data-center onsite WUE in 2023: just over 0.36 L/kWh.
+# - Average indirect water consumption from electricity: 4.52 L/kWh.
+#
+# The tracker keeps the onsite WUE adjustable through the existing
+# "Water factor" slider. The indirect factor remains fixed because
+# comparable, facility-level values are not available for every region.
+INDIRECT_WATER_L_PER_KWH = 4.52
 
-# Approximate indirect water consumed to generate electricity in each region.
-# These values are scenario assumptions because actual data-center locations,
-# power sources, cooling systems, and weather conditions vary.
-REGIONAL_INDIRECT_WATER_L_PER_KWH = {
-    "US Average": 4.52,
-    "California": 3.50,
-    "Texas": 4.80,
-    "Quebec": 2.00,
-    "India": 6.00
-}
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -156,24 +146,12 @@ def calculate_results(
     total_energy = energy_per_prompt * num_prompts
     carbon_emissions = total_energy * carbon_factor
 
-    # Estimated water directly associated with the AI workload.
-    prompt_water = (
-        num_prompts
-        * BASE_WATER_PER_PROMPT_L
-        * MODEL_WATER_MULTIPLIERS[model_profile]
-        * TASK_WATER_MULTIPLIERS[task_type]
-    )
-
-    # Estimated onsite data-center cooling water.
-    cooling_water = total_energy * water_factor
-
-    # Estimated indirect water used to produce the electricity.
-    electricity_water = (
-        total_energy
-        * REGIONAL_INDIRECT_WATER_L_PER_KWH[grid_region]
-    )
-
-    water_used = prompt_water + cooling_water + electricity_water
+    # Operational water consumption is estimated from energy use:
+    # 1. Onsite data-center cooling water (adjustable WUE)
+    # 2. Indirect water consumed while generating electricity
+    onsite_cooling_water = total_energy * water_factor
+    indirect_electricity_water = total_energy * INDIRECT_WATER_L_PER_KWH
+    water_used = onsite_cooling_water + indirect_electricity_water
 
     return energy_per_prompt, total_energy, carbon_emissions, water_used
 
@@ -568,10 +546,10 @@ with tracker_tab:
 
             water_factor = st.slider(
                 "Water factor (liters per kWh)",
-                min_value=0.5,
+                min_value=0.0,
                 max_value=5.0,
                 value=float(DEFAULT_WATER_FACTOR),
-                step=0.1
+                step=0.01
             )
 
         st.markdown(
@@ -603,7 +581,7 @@ with tracker_tab:
     miles_driven = carbon_emissions * MILES_PER_KG_CO2
     led_bulb_minutes = total_energy / LED_BULB_KWH_PER_MIN
     shower_minutes = water_used / SHOWER_LITERS_PER_MIN
-    trees_needed = carbon_emissions / TREE_CO2_PER_YEAR
+    tree_days = (carbon_emissions / TREE_CO2_PER_YEAR) * 365
 
     current_result = {
         "num_prompts": num_prompts,
@@ -700,7 +678,7 @@ with tracker_tab:
         with c5:
             st.metric("Minutes in the Shower", f"{shower_minutes:.1f}")
         with c6:
-            st.metric("Trees Needed (1 Year)", f"{trees_needed:.2f}")
+            st.metric("Tree Absorption Equivalent", f"1 tree for {tree_days:.0f} days")
 
         st.caption(
             "These comparisons are approximate and are designed to make the environmental impact easier to understand."
