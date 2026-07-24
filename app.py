@@ -84,15 +84,15 @@ SHOWER_LITERS_PER_MIN = 7.6
 # sequesters about 60 kg CO2 total, or about 6 kg CO2 per year on average.
 TREE_CO2_PER_YEAR = 6.0
 
-# Research-backed operational water factors.
-# Lawrence Berkeley National Laboratory reports:
-# - Average U.S. data-center onsite WUE in 2023: just over 0.36 L/kWh.
-# - Average indirect water consumption from electricity: 4.52 L/kWh.
+# Research-informed water estimate.
+# Li et al. estimate roughly 10-50 mL of water for a medium-length
+# language-model response. This tracker uses the midpoint: 25 mL.
 #
-# The tracker keeps the onsite WUE adjustable through the existing
-# "Water factor" slider. The indirect factor remains fixed because
-# comparable, facility-level values are not available for every region.
-INDIRECT_WATER_L_PER_KWH = 4.52
+# The baseline energy reference is 0.43 Wh for a standard short chat query.
+# Higher-energy tasks are scaled relative to that baseline. This makes
+# image generation and advanced reasoning use more water than short text.
+BASE_TEXT_PROMPT_WATER_L = 0.025
+BASE_TEXT_PROMPT_ENERGY_KWH = 0.000430
 
 
 if "history" not in st.session_state:
@@ -159,12 +159,23 @@ def calculate_results(
     total_energy = energy_per_prompt * num_prompts
     carbon_emissions = total_energy * carbon_factor
 
-    # Operational water consumption is estimated from energy use:
-    # 1. Onsite data-center cooling water (adjustable WUE)
-    # 2. Indirect water consumed while generating electricity
-    onsite_cooling_water = total_energy * water_factor
-    indirect_electricity_water = total_energy * INDIRECT_WATER_L_PER_KWH
-    water_used = onsite_cooling_water + indirect_electricity_water
+    # Scale the midpoint water estimate for a standard text prompt
+    # according to the selected task's energy demand.
+    energy_intensity_ratio = (
+        energy_per_prompt / BASE_TEXT_PROMPT_ENERGY_KWH
+    )
+    water_per_prompt = (
+        BASE_TEXT_PROMPT_WATER_L * energy_intensity_ratio
+    )
+
+    # The existing advanced-assumption slider acts as an adjustment
+    # around the default data-center water-use assumption.
+    water_adjustment = water_factor / DEFAULT_WATER_FACTOR
+    water_used = (
+        num_prompts
+        * water_per_prompt
+        * water_adjustment
+    )
 
     return energy_per_prompt, total_energy, carbon_emissions, water_used
 
@@ -730,14 +741,14 @@ with tracker_tab:
             **Calculation logic**
             - Published per-prompt energy estimate × number of prompts = total energy used
             - Total energy × regional carbon factor = estimated CO₂ emissions
-            - Total energy × onsite and indirect water factors = estimated water usage
+            - A 25 mL midpoint estimate for a standard text prompt is scaled by the selected task's energy intensity
             - Carbon emissions ÷ average annual tree absorption = tree absorption time
 
             **Important limitation**
-            Exact energy use varies by model, hardware, output length, batching, image
-            resolution, and data-center efficiency. Commercial providers generally do not
-            publish complete per-prompt measurements, so these values should be presented
-            as research-informed estimates rather than exact measurements.
+            The water estimate is research-informed, not a direct measurement. Published
+            studies provide ranges for text prompts, but providers generally do not publish
+            exact water use for every model and image-generation system. The tracker scales
+            the text-prompt midpoint by energy intensity to create a consistent comparison.
             """
         )
 
