@@ -9,39 +9,52 @@ st.set_page_config(
 
 MODEL_PROFILES = {
     "Lightweight Text Model": {
-        "description": "Best for short, simple text tasks with lower environmental impact.",
+        "description": (
+            "Lower-energy text profile based on the measured average for text-generation "
+            "inference in Luccioni et al. Values remain estimates because providers do not "
+            "publish exact per-prompt energy use."
+        ),
         "rates": {
-            "Short text response": 0.001,
-            "Long text generation": 0.0025,
-            "Multiple regenerations": 0.004,
-            "Image generation": 0.010
+            "Short text response": 0.000047,
+            "Long text generation": 0.000470,
+            "Multiple regenerations": 0.001410,
+            "Image generation": 0.002907
         }
     },
     "Standard Chat Model": {
-        "description": "Balanced option for everyday AI chat use.",
+        "description": (
+            "General-purpose chat profile anchored to a published estimate of about "
+            "0.43 Wh for a short GPT-4o-style query."
+        ),
         "rates": {
-            "Short text response": 0.002,
-            "Long text generation": 0.0045,
-            "Multiple regenerations": 0.007,
-            "Image generation": 0.014
+            "Short text response": 0.000430,
+            "Long text generation": 0.001500,
+            "Multiple regenerations": 0.004500,
+            "Image generation": 0.005000
         }
     },
     "Advanced Reasoning Model": {
-        "description": "Stronger performance for complex reasoning, but more resource-intensive.",
+        "description": (
+            "Reasoning-heavy profile using the higher energy range reported for modern "
+            "reasoning systems. Long prompts can be much more energy-intensive."
+        ),
         "rates": {
-            "Short text response": 0.004,
-            "Long text generation": 0.008,
-            "Multiple regenerations": 0.012,
-            "Image generation": 0.020
+            "Short text response": 0.005000,
+            "Long text generation": 0.033000,
+            "Multiple regenerations": 0.099000,
+            "Image generation": 0.008000
         }
     },
     "Large Multimodal Model": {
-        "description": "Highest-impact profile for advanced or multimodal tasks.",
+        "description": (
+            "High-end multimodal profile. Image generation uses the upper measured value "
+            "reported in Luccioni et al., about 11.49 Wh per generated image."
+        ),
         "rates": {
-            "Short text response": 0.005,
-            "Long text generation": 0.010,
-            "Multiple regenerations": 0.015,
-            "Image generation": 0.025
+            "Short text response": 0.000430,
+            "Long text generation": 0.003000,
+            "Multiple regenerations": 0.009000,
+            "Image generation": 0.011490
         }
     }
 }
@@ -55,7 +68,7 @@ GRID_REGIONS = {
 }
 
 DEFAULT_WATER_FACTOR = 0.36
-PHONE_CHARGE_KWH = 0.012
+PHONE_CHARGE_KWH = 0.022
 LAPTOP_HOUR_KWH = 0.05
 
 # EPA equivalency: 0.391 kg CO2e per mile for an average gasoline vehicle.
@@ -67,9 +80,9 @@ LAPTOP_KWH_PER_MIN = 0.05 / 60
 # EPA WaterSense maximum flow rate: 7.6 liters per minute.
 SHOWER_LITERS_PER_MIN = 7.6
 
-# EPA equivalency: an urban tree planted and grown for 10 years
-# sequesters an annual average of 0.060 metric tons (60 kg) of CO2.
-TREE_CO2_PER_YEAR = 60.0
+# EPA equivalency: one urban tree seedling grown for 10 years
+# sequesters about 60 kg CO2 total, or about 6 kg CO2 per year on average.
+TREE_CO2_PER_YEAR = 6.0
 
 # Research-backed operational water factors.
 # Lawrence Berkeley National Laboratory reports:
@@ -678,7 +691,7 @@ with tracker_tab:
         with c5:
             st.metric("Minutes in the Shower", f"{shower_minutes:.1f}")
         with c6:
-            st.metric("Tree Absorption Equivalent", f"1 tree for {tree_days:.0f} days")
+            st.metric("Tree Absorption Time", f"{tree_days:.0f} days")
 
         st.caption(
             "These comparisons are approximate and are designed to make the environmental impact easier to understand."
@@ -715,11 +728,16 @@ with tracker_tab:
             This tracker uses simplified prototype assumptions to estimate environmental impact.
 
             **Calculation logic**
-            - Energy per prompt × number of prompts = total energy used
+            - Published per-prompt energy estimate × number of prompts = total energy used
             - Total energy × regional carbon factor = estimated CO₂ emissions
-            - Total energy × water factor = estimated water usage
+            - Total energy × onsite and indirect water factors = estimated water usage
+            - Carbon emissions ÷ average annual tree absorption = tree absorption time
 
-            These values are estimates designed to improve awareness and support testing.
+            **Important limitation**
+            Exact energy use varies by model, hardware, output length, batching, image
+            resolution, and data-center efficiency. Commercial providers generally do not
+            publish complete per-prompt measurements, so these values should be presented
+            as research-informed estimates rather than exact measurements.
             """
         )
 
