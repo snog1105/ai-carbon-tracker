@@ -63,6 +63,35 @@ LAPTOP_KWH_PER_MIN = 0.05 / 60
 SHOWER_LITERS_PER_MIN = 9
 TREE_CO2_PER_YEAR = 22
 
+# Water-estimation assumptions
+# The 0.025-liter baseline represents 25 mL for a standard short text prompt.
+BASE_WATER_PER_PROMPT_L = 0.025
+
+MODEL_WATER_MULTIPLIERS = {
+    "Lightweight Text Model": 0.60,
+    "Standard Chat Model": 1.00,
+    "Advanced Reasoning Model": 1.80,
+    "Large Multimodal Model": 2.50
+}
+
+TASK_WATER_MULTIPLIERS = {
+    "Short text response": 1.00,
+    "Long text generation": 2.00,
+    "Multiple regenerations": 3.00,
+    "Image generation": 10.00
+}
+
+# Approximate indirect water consumed to generate electricity in each region.
+# These values are scenario assumptions because actual data-center locations,
+# power sources, cooling systems, and weather conditions vary.
+REGIONAL_INDIRECT_WATER_L_PER_KWH = {
+    "US Average": 4.52,
+    "California": 3.50,
+    "Texas": 4.80,
+    "Quebec": 2.00,
+    "India": 6.00
+}
+
 if "history" not in st.session_state:
     st.session_state.history = []
 
@@ -115,11 +144,37 @@ def get_tip_options(level: str):
     ]
 
 
-def calculate_results(num_prompts, model_profile, task_type, carbon_factor, water_factor):
+def calculate_results(
+    num_prompts,
+    model_profile,
+    task_type,
+    grid_region,
+    carbon_factor,
+    water_factor
+):
     energy_per_prompt = MODEL_PROFILES[model_profile]["rates"][task_type]
     total_energy = energy_per_prompt * num_prompts
     carbon_emissions = total_energy * carbon_factor
-    water_used = total_energy * water_factor
+
+    # Estimated water directly associated with the AI workload.
+    prompt_water = (
+        num_prompts
+        * BASE_WATER_PER_PROMPT_L
+        * MODEL_WATER_MULTIPLIERS[model_profile]
+        * TASK_WATER_MULTIPLIERS[task_type]
+    )
+
+    # Estimated onsite data-center cooling water.
+    cooling_water = total_energy * water_factor
+
+    # Estimated indirect water used to produce the electricity.
+    electricity_water = (
+        total_energy
+        * REGIONAL_INDIRECT_WATER_L_PER_KWH[grid_region]
+    )
+
+    water_used = prompt_water + cooling_water + electricity_water
+
     return energy_per_prompt, total_energy, carbon_emissions, water_used
 
 
@@ -535,6 +590,7 @@ with tracker_tab:
         num_prompts=num_prompts,
         model_profile=model_profile,
         task_type=task_type,
+        grid_region=grid_region,
         carbon_factor=carbon_factor,
         water_factor=water_factor
     )
