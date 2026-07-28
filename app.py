@@ -695,9 +695,9 @@ with tracker_tab:
             st.metric("LED Bulb Minutes", f"{led_bulb_minutes:.1f}")
 
         st.caption(
-            "These comparisons are research-informed estimates designed to make AI's environmental impact easier to understand."
-            ""Fully Charged Smartphones" represents the equivalent number of complete smartphone charges."
-            "Water is shown in U.S. gallons. Actual environmental impact varies depending on the AI model, hardware, and data center used."
+            "Phone charges means the equivalent number of complete phone charges. "
+            "Water is shown in U.S. gallons. These comparisons are approximate and "
+            "are designed to make the environmental impact easier to understand."
         )
 
         if comparison_text:
