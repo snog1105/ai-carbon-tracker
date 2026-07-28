@@ -694,22 +694,23 @@ with tracker_tab:
         with bottom_right:
             st.metric("LED Bulb Minutes", f"{led_bulb_minutes:.1f}")
 
-st.caption(
-    "These comparisons are research-informed estimates designed to make AI's environmental impact easier to understand. "
-    "Fully Charged Smartphones represents the equivalent number of complete smartphone charges, and water is shown in U.S. gallons. "
-    "Actual environmental impact varies depending on the AI model, hardware, and data center used."
-)
-if comparison_text:
+        st.caption(
+            "These comparisons are research-informed estimates designed to make AI's environmental impact easier to understand. "
+            "Fully Charged Smartphones represents the equivalent number of complete smartphone charges, and water is shown in U.S. gallons. "
+            "Actual environmental impact varies depending on the AI model, hardware, and data center used."
+        )
+
+        if comparison_text:
             st.markdown(
                 f"""
                 <div class="compare-box">
                     <b>Compared with your last estimate:</b><br>{comparison_text}
                 </div>
                 """,
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
 
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown('<h2 class="section-title">💡 Sustainability Tips</h2>', unsafe_allow_html=True)
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
