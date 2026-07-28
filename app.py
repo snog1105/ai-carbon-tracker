@@ -699,8 +699,7 @@ st.caption(
     "Fully Charged Smartphones represents the equivalent number of complete smartphone charges, and water is shown in U.S. gallons. "
     "Actual environmental impact varies depending on the AI model, hardware, and data center used."
 )
-
-        if comparison_text:
+if comparison_text:
             st.markdown(
                 f"""
                 <div class="compare-box">
