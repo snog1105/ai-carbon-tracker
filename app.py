@@ -10,9 +10,8 @@ st.set_page_config(
 MODEL_PROFILES = {
     "Lightweight Text Model": {
         "description": (
-            "Lower-energy text profile based on the measured average for text-generation "
-            "inference in Luccioni et al. Values remain estimates because providers do not "
-            "publish exact per-prompt energy use."
+            "Based on published research measuring the average energy used for AI text responses. "
+            "Values are estimates because AI companies do not publicly share exact energy use for each prompt. "
         ),
         "rates": {
             "Short text response": 0.000047,
