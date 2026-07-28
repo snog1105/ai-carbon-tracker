@@ -548,7 +548,7 @@ with tracker_tab:
             help="Different regions use different energy sources, so the same AI task can create different emissions depending on where the electricity comes from."
         )
         st.caption(GRID_REGIONS[grid_region]["description"])
-        st.caption("This shows why where AI runs can affect its environmental impact.")
+        st.caption("The same AI task can have a different environmental impact depending on where the electricity comes from.")
 
         with st.expander("Advanced Assumptions"):
             st.write("Use these controls to test how changing assumptions affects the output.")
