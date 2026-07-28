@@ -684,7 +684,7 @@ with tracker_tab:
 
         top_left, top_right = st.columns(2)
         with top_left:
-            st.metric("Full Phone Charges", f"{phone_charges:.1f}")
+            st.metric("Fully Charged Smartphones", f"{phone_charges:.1f}")
         with top_right:
             st.metric("Laptop Minutes", f"{laptop_minutes:.1f}")
 
