@@ -69,6 +69,7 @@ GRID_REGIONS = {
 
 DEFAULT_WATER_FACTOR = 0.36
 PHONE_CHARGE_KWH = 0.022
+LITERS_PER_US_GALLON = 3.785411784
 LAPTOP_HOUR_KWH = 0.05
 
 # EPA equivalency: 0.391 kg CO2e per mile for an average gasoline vehicle.
@@ -77,12 +78,6 @@ MILES_PER_KG_CO2 = 1 / 0.391
 LED_BULB_KWH_PER_MIN = 0.010 / 60
 LAPTOP_KWH_PER_MIN = 0.05 / 60
 
-# EPA WaterSense maximum flow rate: 7.6 liters per minute.
-SHOWER_LITERS_PER_MIN = 7.6
-
-# EPA equivalency: one urban tree seedling grown for 10 years
-# sequesters about 60 kg CO2 total, or about 6 kg CO2 per year on average.
-TREE_CO2_PER_YEAR = 6.0
 
 # Research-informed water estimate.
 # Li et al. estimate roughly 10-50 mL of water for a medium-length
@@ -600,12 +595,11 @@ with tracker_tab:
     impact_level = get_impact_level(carbon_emissions)
     impact_color = get_impact_color(impact_level)
 
+    water_used_gallons = water_used / LITERS_PER_US_GALLON
     phone_charges = total_energy / PHONE_CHARGE_KWH
     laptop_minutes = total_energy / LAPTOP_KWH_PER_MIN
     miles_driven = carbon_emissions * MILES_PER_KG_CO2
     led_bulb_minutes = total_energy / LED_BULB_KWH_PER_MIN
-    shower_minutes = water_used / SHOWER_LITERS_PER_MIN
-    tree_days = (carbon_emissions / TREE_CO2_PER_YEAR) * 365
 
     current_result = {
         "num_prompts": num_prompts,
@@ -617,7 +611,7 @@ with tracker_tab:
         "energy_per_prompt": energy_per_prompt,
         "total_energy": total_energy,
         "carbon_emissions": carbon_emissions,
-        "water_used": water_used,
+        "water_used": water_used_gallons,
         "impact_level": impact_level
     }
 
@@ -643,7 +637,7 @@ with tracker_tab:
         r1, r2 = st.columns(2)
         with r1:
             st.metric("Energy Used", f"{total_energy:.3f} kWh")
-            st.metric("Water Used", f"{water_used:.2f} liters")
+            st.metric("Water Used", f"{water_used_gallons:.2f} gallons")
         with r2:
             st.metric("Carbon Emissions", f"{carbon_emissions:.3f} kg CO₂e")
             st.metric("Impact Level", impact_level)
@@ -688,24 +682,22 @@ with tracker_tab:
 
         st.markdown("### What Does This Mean?")
 
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.metric("Phone Charges", f"{phone_charges:.1f}")
-        with c2:
+        top_left, top_right = st.columns(2)
+        with top_left:
+            st.metric("Full Phone Charges", f"{phone_charges:.1f}")
+        with top_right:
             st.metric("Laptop Minutes", f"{laptop_minutes:.1f}")
-        with c3:
-            st.metric("Miles Driven", f"{miles_driven:.2f}")
 
-        c4, c5, c6 = st.columns(3)
-        with c4:
+        bottom_left, bottom_right = st.columns(2)
+        with bottom_left:
+            st.metric("Miles Driven", f"{miles_driven:.2f}")
+        with bottom_right:
             st.metric("LED Bulb Minutes", f"{led_bulb_minutes:.1f}")
-        with c5:
-            st.metric("Minutes in the Shower", f"{shower_minutes:.1f}")
-        with c6:
-            st.metric("Tree Absorption Time", f"{tree_days:.0f} days")
 
         st.caption(
-            "These comparisons are approximate and are designed to make the environmental impact easier to understand."
+            "Phone charges means the equivalent number of complete phone charges. "
+            "Water is shown in U.S. gallons. These comparisons are approximate and "
+            "are designed to make the environmental impact easier to understand."
         )
 
         if comparison_text:
@@ -742,7 +734,7 @@ with tracker_tab:
             - Published per-prompt energy estimate × number of prompts = total energy used
             - Total energy × regional carbon factor = estimated CO₂ emissions
             - A 25 mL midpoint estimate for a standard text prompt is scaled by the selected task's energy intensity
-            - Carbon emissions ÷ average annual tree absorption = tree absorption time
+            - Estimated water is converted from liters to U.S. gallons using 3.785411784 liters per gallon
 
             **Important limitation**
             The water estimate is research-informed, not a direct measurement. Published
@@ -762,7 +754,7 @@ with insights_tab:
         history_df["Run"] = history_df["Run"] + 1
 
         st.write("This chart compares your recent estimate runs across carbon, energy, and water.")
-        chart_df = history_df[["Run", "carbon_emissions", "total_energy", "water_used"]].set_index("Run")
+        chart_df = history_df[["Run", "carbon_emissions", "total_energy", "water_used"]].rename(columns={"water_used": "water_used_gallons"}).set_index("Run")
         st.line_chart(chart_df)
 
         st.write("Recent estimate history:")
@@ -771,7 +763,7 @@ with insights_tab:
                 "Run", "model_profile", "task_type", "grid_region",
                 "num_prompts", "carbon_emissions",
                 "total_energy", "water_used", "impact_level"
-            ]],
+            ]].rename(columns={"water_used": "water_used_gallons"}),
             use_container_width=True
         )
     else:
